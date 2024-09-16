@@ -80,7 +80,7 @@
       </button>
       <div id="loading" style="display: none">Generating character...</div>
       <div id="character"></div>
-      <button id="rerollButton" style="display: none">Reroll Character</button>
+      <button id="rerollButton" style="display: none">Fight Monsters!</button>
     </div>
 
     <script>
@@ -125,7 +125,16 @@
           document.getElementById('pubkeyDisplay').textContent = truncatedPubkey
           document.getElementById('userInfo').style.display = 'block'
           document.getElementById('loginButton').style.display = 'none'
-          document.getElementById('generateButton').style.display = 'block'
+
+          // Check if blockhash is set
+          const blockHash = getQueryParam('blockhash')
+          if (blockHash) {
+            // If both pubkey and blockhash are set, generate character immediately
+            generateCharacter(blockHash)
+          } else {
+            // If only pubkey is set, show the generate button
+            document.getElementById('generateButton').style.display = 'block'
+          }
         } catch (error) {
           console.error('Error logging in:', error)
           alert(
@@ -223,7 +232,7 @@
         return character
       }
 
-      function generateCharacter() {
+      function generateCharacter(blockHash = null) {
         if (!userPubkey) {
           alert('Please login with Nostr first')
           return
@@ -235,7 +244,7 @@
         document.getElementById('character').innerHTML = ''
         document.getElementById('rerollButton').style.display = 'none'
 
-        const blockHash = getQueryParam('blockhash') || defaultBlockHash
+        blockHash = blockHash || getQueryParam('blockhash') || defaultBlockHash
 
         console.log('Using block hash:', blockHash)
 
@@ -277,13 +286,9 @@
       }
 
       function rerollCharacter() {
-        if (
-          confirm(
-            'Are you sure you want to reroll? Your current character will die!'
-          )
-        ) {
-          generateCharacter()
-        }
+        alert(
+          'Monster fighting will be implemented soon! Stay tuned for updates.'
+        )
       }
 
       // Add event listeners when the DOM is fully loaded
@@ -291,7 +296,7 @@
         document.getElementById('loginButton').addEventListener('click', login)
         document
           .getElementById('generateButton')
-          .addEventListener('click', generateCharacter)
+          .addEventListener('click', () => generateCharacter())
         document
           .getElementById('rerollButton')
           .addEventListener('click', rerollCharacter)
