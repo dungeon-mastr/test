@@ -65,6 +65,13 @@
         text-align: center;
         display: none;
       }
+      .stat-divider {
+        margin: 0.5rem 0;
+        border-bottom: 1px solid #ccc;
+      }
+      .stat xp {
+        margin-top: 1rem;
+      }
     </style>
     <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
   </head>
@@ -273,14 +280,15 @@
         const characterDiv = document.getElementById('character')
         characterDiv.innerHTML = `
           <h2>${character.race} ${character.class}</h2>
-          <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}</span></div>
-          <div class="stat"><span>Experience Points:</span> <span>${character.xp}</span></div>
           <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
           <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
           <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
           <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
           <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
           <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
+          <hr class="stat-divider">
+          <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}/${character.hitPoints}</span></div>
+          <div class="stat xp"><span>Experience Points:</span> <span>0/2000</span></div>
         `
         document.getElementById('rerollButton').style.display = 'block'
       }
