@@ -89,16 +89,36 @@
       const defaultBlockHash =
         '00000000518f4e7d696797d3891f88cc210dc5de1f7f6ec69c732d20a6371e7e'
 
+      function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search)
+        return urlParams.get(param)
+      }
+
       async function login() {
         try {
-          if (typeof window.nostr === 'undefined') {
-            alert(
-              'Nostr extension not found. Please install a Nostr extension.'
-            )
-            return
+          // First, check the query string for the pubkey
+          userPubkey = getQueryParam('pubkey')
+
+          if (!userPubkey) {
+            // If not in query string, check localStorage
+            userPubkey = localStorage.getItem('nostr:pubkey')
+
+            if (!userPubkey) {
+              // If not in localStorage, try to get it from the Nostr extension
+              if (typeof window.nostr === 'undefined') {
+                alert(
+                  'Nostr extension not found and no pubkey in localStorage or query string. Please install a Nostr extension or set your pubkey manually.'
+                )
+                return
+              }
+
+              userPubkey = await window.nostr.getPublicKey()
+
+              // Save the pubkey to localStorage for future use
+              localStorage.setItem('nostr:pubkey', userPubkey)
+            }
           }
 
-          userPubkey = await window.nostr.getPublicKey()
           console.log('Logged in with pubkey:', userPubkey)
 
           const truncatedPubkey = userPubkey.substring(0, 16) + '...'
@@ -108,7 +128,9 @@
           document.getElementById('generateButton').style.display = 'block'
         } catch (error) {
           console.error('Error logging in:', error)
-          alert('Failed to login. Please try again.')
+          alert(
+            'Failed to login. Please try again or set your pubkey manually.'
+          )
         }
       }
 
@@ -213,8 +235,7 @@
         document.getElementById('character').innerHTML = ''
         document.getElementById('rerollButton').style.display = 'none'
 
-        const urlParams = new URLSearchParams(window.location.search)
-        const blockHash = urlParams.get('blockhash') || defaultBlockHash
+        const blockHash = getQueryParam('blockhash') || defaultBlockHash
 
         console.log('Using block hash:', blockHash)
 
@@ -243,15 +264,14 @@
         const characterDiv = document.getElementById('character')
         characterDiv.innerHTML = `
           <h2>${character.race} ${character.class}</h2>
+          <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}</span></div>
+          <div class="stat"><span>Experience Points:</span> <span>${character.xp}</span></div>
           <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
           <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
           <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
           <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
           <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
           <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
-          <div class="stat"><span></span> <span></span></div>
-          <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}</span></div>
-          <div class="stat"><span>Experience Points:</span> <span>${character.xp}</span></div>
         `
         document.getElementById('rerollButton').style.display = 'block'
       }
@@ -275,6 +295,11 @@
         document
           .getElementById('rerollButton')
           .addEventListener('click', rerollCharacter)
+
+        // Check if we have a pubkey in the query string or localStorage and log in automatically
+        if (getQueryParam('pubkey') || localStorage.getItem('nostr:pubkey')) {
+          login()
+        }
       })
     </script>
   </body>
