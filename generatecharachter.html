@@ -71,27 +71,111 @@
   <body>
     <div class="container">
       <h1>Nostr D&D Character Generator</h1>
-      <button id="loginButton" onclick="login()">Login with Nostr</button>
+      <button id="loginButton">Login with Nostr</button>
       <div id="userInfo" style="display: none">
         <p>Logged in as: <span id="pubkeyDisplay"></span></p>
       </div>
-      <button
-        id="generateButton"
-        onclick="generateCharacter()"
-        style="display: none"
-      >
+      <button id="generateButton" style="display: none">
         Generate Character
       </button>
-      <div id="loading">Generating character...</div>
+      <div id="loading" style="display: none">Generating character...</div>
       <div id="character"></div>
-      <button id="rerollButton" onclick="rerollCharacter()">
-        Reroll Character
-      </button>
+      <button id="rerollButton" style="display: none">Reroll Character</button>
     </div>
 
     <script>
       let currentCharacter = null
       let userPubkey = null
+      const defaultBlockHash =
+        '00000000518f4e7d696797d3891f88cc210dc5de1f7f6ec69c732d20a6371e7e'
+
+      async function sha256(message) {
+        const msgBuffer = new TextEncoder().encode(message)
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
+        const hashArray = Array.from(new Uint8Array(hashBuffer))
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+      }
+
+      function getRandomInt(max, seed) {
+        const x = Math.sin(seed) * 10000
+        return Math.floor((x - Math.floor(x)) * max)
+      }
+
+      function getModifier(stat) {
+        return Math.floor((stat - 10) / 2)
+      }
+
+      async function createCharacter(pubkey, blockHash) {
+        const seed = await sha256(pubkey + blockHash)
+        let seedIndex = 0
+
+        const races = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome']
+        const classes = ['Fighter', 'Wizard', 'Rogue', 'Cleric', 'Ranger']
+
+        const characterClass =
+          classes[
+            getRandomInt(
+              classes.length,
+              parseInt(seed.substr((seedIndex += 8), 8), 16)
+            )
+          ]
+
+        const stats = {
+          strength:
+            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
+            8,
+          dexterity:
+            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
+            8,
+          constitution:
+            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
+            8,
+          intelligence:
+            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
+            8,
+          wisdom:
+            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
+            8,
+          charisma:
+            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) + 8
+        }
+
+        const constitutionModifier = getModifier(stats.constitution)
+
+        let hitDice
+        switch (characterClass) {
+          case 'Fighter':
+            hitDice = 10
+            break
+          case 'Wizard':
+            hitDice = 6
+            break
+          case 'Rogue':
+            hitDice = 8
+            break
+          case 'Cleric':
+            hitDice = 8
+            break
+          case 'Ranger':
+            hitDice = 10
+            break
+          default:
+            hitDice = 8
+        }
+
+        const hitPoints = hitDice + constitutionModifier
+
+        const character = {
+          race: races[
+            getRandomInt(races.length, parseInt(seed.substr(seedIndex, 8), 16))
+          ],
+          class: characterClass,
+          stats: stats,
+          hitPoints: hitPoints
+        }
+
+        return character
+      }
 
       async function login() {
         try {
@@ -105,7 +189,6 @@
           userPubkey = await window.nostr.getPublicKey()
           console.log('Logged in with pubkey:', userPubkey)
 
-          // Display only the first 16 characters of the pubkey
           const truncatedPubkey = userPubkey.substring(0, 16) + '...'
           document.getElementById('pubkeyDisplay').textContent = truncatedPubkey
           document.getElementById('userInfo').style.display = 'block'
@@ -115,27 +198,6 @@
           console.error('Error logging in:', error)
           alert('Failed to login. Please try again.')
         }
-      }
-
-      function createCharacter(pubkey, blockHash) {
-        // Implement the actual character generation logic here
-        const races = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome']
-        const classes = ['Fighter', 'Wizard', 'Rogue', 'Cleric', 'Ranger']
-
-        const character = {
-          race: races[Math.floor(Math.random() * races.length)],
-          class: classes[Math.floor(Math.random() * classes.length)],
-          stats: {
-            strength: Math.floor(Math.random() * 10) + 8,
-            dexterity: Math.floor(Math.random() * 10) + 8,
-            constitution: Math.floor(Math.random() * 10) + 8,
-            intelligence: Math.floor(Math.random() * 10) + 8,
-            wisdom: Math.floor(Math.random() * 10) + 8,
-            charisma: Math.floor(Math.random() * 10) + 8
-          }
-        }
-
-        return character
       }
 
       function generateCharacter() {
@@ -150,16 +212,14 @@
         document.getElementById('character').innerHTML = ''
         document.getElementById('rerollButton').style.display = 'none'
 
-        setTimeout(() => {
-          try {
-            console.log('Simulating block hash generation')
-            const simulatedBlockHash = Math.random()
-              .toString(36)
-              .substring(2, 15)
-            console.log('Simulated block hash:', simulatedBlockHash)
+        const urlParams = new URLSearchParams(window.location.search)
+        const blockHash = urlParams.get('blockhash') || defaultBlockHash
 
-            console.log('Calling createCharacter function')
-            currentCharacter = createCharacter(userPubkey, simulatedBlockHash)
+        console.log('Using block hash:', blockHash)
+
+        createCharacter(userPubkey, blockHash)
+          .then(character => {
+            currentCharacter = character
             console.log('Generated character:', currentCharacter)
 
             if (currentCharacter) {
@@ -167,27 +227,29 @@
             } else {
               throw new Error('Character generation failed')
             }
-          } catch (error) {
+          })
+          .catch(error => {
             console.error('Error generating character:', error)
             document.getElementById('character').innerHTML =
               'Error generating character. Please try again.'
-          } finally {
+          })
+          .finally(() => {
             document.getElementById('loading').style.display = 'none'
-          }
-        }, 1000)
+          })
       }
 
       function displayCharacter(character) {
         const characterDiv = document.getElementById('character')
         characterDiv.innerHTML = `
-                <h2>${character.race} ${character.class}</h2>
-                <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
-                <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
-                <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
-                <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
-                <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
-                <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
-            `
+          <h2>${character.race} ${character.class}</h2>
+          <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}</span></div>
+          <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
+          <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
+          <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
+          <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
+          <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
+          <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
+        `
         document.getElementById('rerollButton').style.display = 'block'
       }
 
@@ -200,6 +262,17 @@
           generateCharacter()
         }
       }
+
+      // Add event listeners when the DOM is fully loaded
+      document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('loginButton').addEventListener('click', login)
+        document
+          .getElementById('generateButton')
+          .addEventListener('click', generateCharacter)
+        document
+          .getElementById('rerollButton')
+          .addEventListener('click', rerollCharacter)
+      })
     </script>
   </body>
 </html>
