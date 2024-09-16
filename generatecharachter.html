@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nostr D&D Character Generator</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background-color: #34495e;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        width: 100%;
+      }
+      h1 {
+        text-align: center;
+        color: #3498db;
+      }
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: none;
+        border-radius: 5px;
+      }
+      button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #2980b9;
+      }
+      #character {
+        margin-top: 1rem;
+        background-color: #2c3e50;
+        padding: 1rem;
+        border-radius: 5px;
+      }
+      .stat {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+      }
+      #rerollButton {
+        display: none;
+        margin-top: 1rem;
+      }
+      #loading {
+        text-align: center;
+        display: none;
+      }
+    </style>
+    <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Nostr D&D Character Generator</h1>
+      <button id="loginButton" onclick="login()">Login with Nostr</button>
+      <div id="userInfo" style="display: none">
+        <p>Logged in as: <span id="pubkeyDisplay"></span></p>
+      </div>
+      <button
+        id="generateButton"
+        onclick="generateCharacter()"
+        style="display: none"
+      >
+        Generate Character
+      </button>
+      <div id="loading">Generating character...</div>
+      <div id="character"></div>
+      <button id="rerollButton" onclick="rerollCharacter()">
+        Reroll Character
+      </button>
+    </div>
+
+    <script>
+      let currentCharacter = null
+      let userPubkey = null
+
+      async function login() {
+        try {
+          if (typeof window.nostr === 'undefined') {
+            alert(
+              'Nostr extension not found. Please install a Nostr extension.'
+            )
+            return
+          }
+
+          userPubkey = await window.nostr.getPublicKey()
+          console.log('Logged in with pubkey:', userPubkey)
+
+          // Display only the first 16 characters of the pubkey
+          const truncatedPubkey = userPubkey.substring(0, 16) + '...'
+          document.getElementById('pubkeyDisplay').textContent = truncatedPubkey
+          document.getElementById('userInfo').style.display = 'block'
+          document.getElementById('loginButton').style.display = 'none'
+          document.getElementById('generateButton').style.display = 'block'
+        } catch (error) {
+          console.error('Error logging in:', error)
+          alert('Failed to login. Please try again.')
+        }
+      }
+
+      function createCharacter(pubkey, blockHash) {
+        // Implement the actual character generation logic here
+        const races = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome']
+        const classes = ['Fighter', 'Wizard', 'Rogue', 'Cleric', 'Ranger']
+
+        const character = {
+          race: races[Math.floor(Math.random() * races.length)],
+          class: classes[Math.floor(Math.random() * classes.length)],
+          stats: {
+            strength: Math.floor(Math.random() * 10) + 8,
+            dexterity: Math.floor(Math.random() * 10) + 8,
+            constitution: Math.floor(Math.random() * 10) + 8,
+            intelligence: Math.floor(Math.random() * 10) + 8,
+            wisdom: Math.floor(Math.random() * 10) + 8,
+            charisma: Math.floor(Math.random() * 10) + 8
+          }
+        }
+
+        return character
+      }
+
+      function generateCharacter() {
+        if (!userPubkey) {
+          alert('Please login with Nostr first')
+          return
+        }
+
+        console.log('Starting character generation for pubkey:', userPubkey)
+
+        document.getElementById('loading').style.display = 'block'
+        document.getElementById('character').innerHTML = ''
+        document.getElementById('rerollButton').style.display = 'none'
+
+        setTimeout(() => {
+          try {
+            console.log('Simulating block hash generation')
+            const simulatedBlockHash = Math.random()
+              .toString(36)
+              .substring(2, 15)
+            console.log('Simulated block hash:', simulatedBlockHash)
+
+            console.log('Calling createCharacter function')
+            currentCharacter = createCharacter(userPubkey, simulatedBlockHash)
+            console.log('Generated character:', currentCharacter)
+
+            if (currentCharacter) {
+              displayCharacter(currentCharacter)
+            } else {
+              throw new Error('Character generation failed')
+            }
+          } catch (error) {
+            console.error('Error generating character:', error)
+            document.getElementById('character').innerHTML =
+              'Error generating character. Please try again.'
+          } finally {
+            document.getElementById('loading').style.display = 'none'
+          }
+        }, 1000)
+      }
+
+      function displayCharacter(character) {
+        const characterDiv = document.getElementById('character')
+        characterDiv.innerHTML = `
+                <h2>${character.race} ${character.class}</h2>
+                <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
+                <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
+                <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
+                <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
+                <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
+                <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
+            `
+        document.getElementById('rerollButton').style.display = 'block'
+      }
+
+      function rerollCharacter() {
+        if (
+          confirm(
+            'Are you sure you want to reroll? Your current character will die!'
+          )
+        ) {
+          generateCharacter()
+        }
+      }
+    </script>
+  </body>
+</html>
