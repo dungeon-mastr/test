@@ -89,6 +89,29 @@
       const defaultBlockHash =
         '00000000518f4e7d696797d3891f88cc210dc5de1f7f6ec69c732d20a6371e7e'
 
+      async function login() {
+        try {
+          if (typeof window.nostr === 'undefined') {
+            alert(
+              'Nostr extension not found. Please install a Nostr extension.'
+            )
+            return
+          }
+
+          userPubkey = await window.nostr.getPublicKey()
+          console.log('Logged in with pubkey:', userPubkey)
+
+          const truncatedPubkey = userPubkey.substring(0, 16) + '...'
+          document.getElementById('pubkeyDisplay').textContent = truncatedPubkey
+          document.getElementById('userInfo').style.display = 'block'
+          document.getElementById('loginButton').style.display = 'none'
+          document.getElementById('generateButton').style.display = 'block'
+        } catch (error) {
+          console.error('Error logging in:', error)
+          alert('Failed to login. Please try again.')
+        }
+      }
+
       async function sha256(message) {
         const msgBuffer = new TextEncoder().encode(message)
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
@@ -171,33 +194,11 @@
           ],
           class: characterClass,
           stats: stats,
-          hitPoints: hitPoints
+          hitPoints: hitPoints,
+          xp: 0 // Initialize XP at 0
         }
 
         return character
-      }
-
-      async function login() {
-        try {
-          if (typeof window.nostr === 'undefined') {
-            alert(
-              'Nostr extension not found. Please install a Nostr extension.'
-            )
-            return
-          }
-
-          userPubkey = await window.nostr.getPublicKey()
-          console.log('Logged in with pubkey:', userPubkey)
-
-          const truncatedPubkey = userPubkey.substring(0, 16) + '...'
-          document.getElementById('pubkeyDisplay').textContent = truncatedPubkey
-          document.getElementById('userInfo').style.display = 'block'
-          document.getElementById('loginButton').style.display = 'none'
-          document.getElementById('generateButton').style.display = 'block'
-        } catch (error) {
-          console.error('Error logging in:', error)
-          alert('Failed to login. Please try again.')
-        }
       }
 
       function generateCharacter() {
@@ -242,13 +243,15 @@
         const characterDiv = document.getElementById('character')
         characterDiv.innerHTML = `
           <h2>${character.race} ${character.class}</h2>
-          <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}</span></div>
           <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
           <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
           <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
           <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
           <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
           <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
+          <div class="stat"><span></span> <span></span></div>
+          <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}</span></div>
+          <div class="stat"><span>Experience Points:</span> <span>${character.xp}</span></div>
         `
         document.getElementById('rerollButton').style.display = 'block'
       }
