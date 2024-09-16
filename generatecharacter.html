@@ -72,12 +72,48 @@
       .stat xp {
         margin-top: 1rem;
       }
+
+      .stat-divider {
+        border: 0;
+        height: 1px;
+        background-image: linear-gradient(
+          to right,
+          rgba(0, 0, 0, 0),
+          rgba(255, 255, 255, 0.75),
+          rgba(0, 0, 0, 0)
+        );
+        margin: 15px 0;
+      }
+
+      .xp {
+        font-weight: bold;
+        color: #f39c12;
+      }
+
+      h2 {
+        color: #3498db;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+      }
+
+      .stat {
+        background-color: rgba(44, 62, 80, 0.6);
+        padding: 8px 12px;
+        border-radius: 5px;
+        margin-bottom: 8px;
+      }
+
+      .stat span:first-child {
+        font-weight: bold;
+      }
     </style>
     <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
   </head>
   <body>
     <div class="container">
-      <h1>Nostr D&D Character Generator</h1>
+      <h1>Dungeon Mastr Character Gen</h1>
       <button id="loginButton">Login with Nostr</button>
       <div id="userInfo" style="display: none">
         <p>Logged in as: <span id="pubkeyDisplay"></span></p>
@@ -90,7 +126,8 @@
       <button id="rerollButton" style="display: none">Fight Monsters!</button>
     </div>
 
-    <script>
+    <script type="module">
+      import { createCharacter } from './lib.js'
       let currentCharacter = null
       let userPubkey = null
       const defaultBlockHash =
@@ -166,79 +203,6 @@
         return Math.floor((stat - 10) / 2)
       }
 
-      async function createCharacter(pubkey, blockHash) {
-        const seed = await sha256(pubkey + blockHash)
-        let seedIndex = 0
-
-        const races = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome']
-        const classes = ['Fighter', 'Wizard', 'Rogue', 'Cleric', 'Ranger']
-
-        const characterClass =
-          classes[
-            getRandomInt(
-              classes.length,
-              parseInt(seed.substr((seedIndex += 8), 8), 16)
-            )
-          ]
-
-        const stats = {
-          strength:
-            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
-            8,
-          dexterity:
-            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
-            8,
-          constitution:
-            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
-            8,
-          intelligence:
-            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
-            8,
-          wisdom:
-            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) +
-            8,
-          charisma:
-            getRandomInt(13, parseInt(seed.substr((seedIndex += 8), 8), 16)) + 8
-        }
-
-        const constitutionModifier = getModifier(stats.constitution)
-
-        let hitDice
-        switch (characterClass) {
-          case 'Fighter':
-            hitDice = 10
-            break
-          case 'Wizard':
-            hitDice = 6
-            break
-          case 'Rogue':
-            hitDice = 8
-            break
-          case 'Cleric':
-            hitDice = 8
-            break
-          case 'Ranger':
-            hitDice = 10
-            break
-          default:
-            hitDice = 8
-        }
-
-        const hitPoints = hitDice + constitutionModifier
-
-        const character = {
-          race: races[
-            getRandomInt(races.length, parseInt(seed.substr(seedIndex, 8), 16))
-          ],
-          class: characterClass,
-          stats: stats,
-          hitPoints: hitPoints,
-          xp: 0 // Initialize XP at 0
-        }
-
-        return character
-      }
-
       function generateCharacter(blockHash = null) {
         if (!userPubkey) {
           alert('Please login with Nostr first')
@@ -279,15 +243,15 @@
       function displayCharacter(character) {
         const characterDiv = document.getElementById('character')
         characterDiv.innerHTML = `
-          <h2>${character.race} ${character.class}</h2>
+          <h2>${character.gender} ${character.race} ${character.class}</h2>
           <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
           <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
           <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
           <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
           <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
           <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
-          <hr class="stat-divider">
           <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}/${character.hitPoints}</span></div>
+          <hr class="stat-divider">
           <div class="stat xp"><span>Experience Points:</span> <span>0/2000</span></div>
         `
         document.getElementById('rerollButton').style.display = 'block'
