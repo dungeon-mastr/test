@@ -54,7 +54,7 @@
     "Dwarf": {
       "Fighter": "path/to/female_dwarf_fighter.jpg",
       "Wizard": "path/to/female_dwarf_wizard.jpg",
-      "Cleric": "path/to/female_dwarf_cleric.jpg",
+      "Cleric": "https://cdn.midjourney.com/728df0f3-046f-4431-8f7c-d4f74e700888/0_0.png",
       "Rogue": "path/to/female_dwarf_rogue.jpg",
       "Ranger": "https://cdn.midjourney.com/5b567b76-d18b-44c5-af42-2b0865abcd98/0_0.png"
     },
