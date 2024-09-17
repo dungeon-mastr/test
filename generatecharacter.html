@@ -140,97 +140,15 @@
           'https://cdn.midjourney.com/acd01992-96a9-47ef-bdb9-62c9a4bf30bc/0_0.png'
       }
 
-      const characterImages = {
-        Male: {
-          Human: {
-            Fighter:
-              'https://cdn.midjourney.com/f4014368-ad38-41f7-87fb-f7207a0fa530/0_3.png',
-            Wizard:
-              'https://cdn.midjourney.com/7dd5d489-16ed-4a3d-aea6-44a376cd0603/0_0.png',
-            Cleric:
-              'https://cdn.midjourney.com/f7e4990b-5b09-41eb-904b-7ec65e012ef9/0_0.png',
-            Rogue:
-              'https://cdn.midjourney.com/b276635d-2ba0-4003-b986-8263936292c4/0_0.png',
-            Ranger:
-              'https://cdn.midjourney.com/16de7f9c-e503-4965-842e-1ce344da4cee/0_0.png'
-          },
-          Elf: {
-            Fighter: 'path/to/male_elf_fighter.jpg',
-            Wizard: 'path/to/male_elf_wizard.jpg',
-            Cleric:
-              'https://cdn.midjourney.com/ed3b9f4d-e787-4150-97d8-5ac8be6516ed/0_0.png',
-            Rogue:
-              'https://cdn.midjourney.com/8b4867e2-6bb3-4be3-95f1-a0f4111a355e/0_0.png',
-            Ranger: 'path/to/male_elf_ranger.jpg'
-          },
-          Dwarf: {
-            Fighter: 'path/to/male_dwarf_fighter.jpg',
-            Wizard: 'path/to/male_dwarf_wizard.jpg',
-            Cleric: 'path/to/male_dwarf_cleric.jpg',
-            Rogue: 'path/to/male_dwarf_rogue.jpg',
-            Ranger: 'path/to/male_dwarf_ranger.jpg'
-          },
-          Halfling: {
-            Fighter: 'path/to/male_halfling_fighter.jpg',
-            Wizard: 'path/to/male_halfling_wizard.jpg',
-            Cleric: 'path/to/male_halfling_cleric.jpg',
-            Rogue:
-              'https://cdn.midjourney.com/39373249-7b34-4978-a232-1f5f5ed6e115/0_0.png',
-            Ranger: 'path/to/male_halfling_ranger.jpg'
-          },
-          Gnome: {
-            Fighter:
-              'https://cdn.midjourney.com/ef2c0255-6e15-4067-a01f-199641b73d85/0_0.png',
-            Wizard: 'path/to/male_gnome_wizard.jpg',
-            Cleric: 'path/to/male_gnome_cleric.jpg',
-            Rogue: 'path/to/male_gnome_rogue.jpg',
-            Ranger: 'path/to/male_gnome_ranger.jpg'
-          }
-        },
-        Female: {
-          Human: {
-            Fighter: 'path/to/female_human_fighter.jpg',
-            Wizard: 'path/to/female_human_wizard.jpg',
-            Cleric: 'path/to/female_human_cleric.jpg',
-            Rogue: 'path/to/female_human_rogue.jpg',
-            Ranger: 'path/to/female_human_ranger.jpg'
-          },
-          Elf: {
-            Fighter:
-              'https://cdn.midjourney.com/cf618b00-b9e9-41a6-a54a-532b5e23ba07/0_0.png',
-            Wizard: 'path/to/female_elf_wizard.jpg',
-            Cleric: 'path/to/female_elf_cleric.jpg',
-            Rogue: 'path/to/female_elf_rogue.jpg',
-            Ranger: 'path/to/female_elf_ranger.jpg'
-          },
-          Dwarf: {
-            Fighter: 'path/to/female_dwarf_fighter.jpg',
-            Wizard: 'path/to/female_dwarf_wizard.jpg',
-            Cleric: 'path/to/female_dwarf_cleric.jpg',
-            Rogue: 'path/to/female_dwarf_rogue.jpg',
-            Ranger:
-              'https://cdn.midjourney.com/5b567b76-d18b-44c5-af42-2b0865abcd98/0_0.png'
-          },
-          Halfling: {
-            Fighter: 'path/to/female_halfling_fighter.jpg',
-            Wizard: 'path/to/female_halfling_wizard.jpg',
-            Cleric: 'path/to/female_halfling_cleric.jpg',
-            Rogue:
-              'https://cdn.midjourney.com/39373249-7b34-4978-a232-1f5f5ed6e115/0_0.png',
-            Ranger:
-              'https://cdn.midjourney.com/0e9ddda5-4c3d-42b3-8a3f-331b1fe51f1d/0_0.png'
-          },
-          Gnome: {
-            Fighter:
-              'https://cdn.midjourney.com/845e99b7-cf88-4bae-8d21-59b503408c2a/0_0.png',
-            Wizard: 'path/to/female_gnome_wizard.jpg',
-            Cleric: 'path/to/female_gnome_cleric.jpg',
-            Rogue: 'path/to/female_gnome_rogue.jpg',
-            Ranger:
-              'https://cdn.midjourney.com/8dd58558-3f2e-4c5e-9d87-a620e733c33e/0_0.png'
-          }
-        }
-      }
+      let characterImages = null
+
+      // Load the character images from chars.json
+      fetch('chars.json')
+        .then(response => response.json())
+        .then(data => {
+          characterImages = data
+        })
+        .catch(error => console.error('Error loading character images:', error))
 
       function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search)
@@ -342,27 +260,47 @@
       function displayCharacter(character) {
         const characterDiv = document.getElementById('character')
 
-        // Check if an image exists for this character combination
-        const imagePath =
-          characterImages[character.gender]?.[character.race]?.[character.class]
+        // Check if characterImages is loaded
+        if (characterImages) {
+          // Check if an image exists for this character combination
+          const imagePath =
+            characterImages[character.gender]?.[character.race]?.[
+              character.class
+            ]
 
-        const imageHtml = imagePath
-          ? `<img src="${imagePath}" alt="${character.gender} ${character.race} ${character.class}" style="max-width: 100%; margin-bottom: 15px;">`
-          : ''
+          const imageHtml = imagePath
+            ? `<img src="${imagePath}" alt="${character.gender} ${character.race} ${character.class}" style="max-width: 100%; margin-bottom: 15px;">`
+            : ''
 
-        characterDiv.innerHTML = `
-          ${imageHtml}
-          <h2>${character.gender} ${character.race} ${character.class}</h2>
-          <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}/${character.hitPoints}</span></div>
-          <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
-          <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
-          <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
-          <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
-          <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
-          <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
-          <hr class="stat-divider">
-          <div class="stat xp"><span>Experience Points:</span> <span>0/2000</span></div>
-        `
+          characterDiv.innerHTML = `
+            ${imageHtml}
+            <h2>${character.gender} ${character.race} ${character.class}</h2>
+            <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}/${character.hitPoints}</span></div>
+            <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
+            <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
+            <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
+            <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
+            <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
+            <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
+            <hr class="stat-divider">
+            <div class="stat xp"><span>Experience Points:</span> <span>0/2000</span></div>
+          `
+        } else {
+          console.error('Character images not loaded yet')
+          // Display character without image
+          characterDiv.innerHTML = `
+            <h2>${character.gender} ${character.race} ${character.class}</h2>
+            <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}/${character.hitPoints}</span></div>
+            <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
+            <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
+            <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
+            <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
+            <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
+            <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
+            <hr class="stat-divider">
+            <div class="stat xp"><span>Experience Points:</span> <span>0/2000</span></div>
+          `
+        }
         document.getElementById('rerollButton').style.display = 'block'
       }
 

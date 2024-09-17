@@ -178,92 +178,16 @@
           'https://cdn.midjourney.com/acd01992-96a9-47ef-bdb9-62c9a4bf30bc/0_0.png'
       }
 
-      const characterImages = {
-        Male: {
-          Human: {
-            Fighter: 'path/to/male_human_fighter.jpg',
-            Wizard:
-              'https://cdn.midjourney.com/7dd5d489-16ed-4a3d-aea6-44a376cd0603/0_0.png',
-            Cleric: 'path/to/male_human_cleric.jpg',
-            Rogue:
-              'https://cdn.midjourney.com/b276635d-2ba0-4003-b986-8263936292c4/0_0.png',
-            Ranger:
-              'https://cdn.midjourney.com/16de7f9c-e503-4965-842e-1ce344da4cee/0_0.png'
-          },
-          Elf: {
-            Fighter: 'path/to/male_elf_fighter.jpg',
-            Wizard: 'path/to/male_elf_wizard.jpg',
-            Cleric: 'path/to/male_elf_cleric.jpg',
-            Rogue:
-              'https://cdn.midjourney.com/8b4867e2-6bb3-4be3-95f1-a0f4111a355e/0_0.png',
-            Ranger: 'path/to/male_elf_ranger.jpg'
-          },
-          Dwarf: {
-            Fighter: 'path/to/male_dwarf_fighter.jpg',
-            Wizard: 'path/to/male_dwarf_wizard.jpg',
-            Cleric: 'path/to/male_dwarf_cleric.jpg',
-            Rogue: 'path/to/male_dwarf_rogue.jpg',
-            Ranger: 'path/to/male_dwarf_ranger.jpg'
-          },
-          Halfling: {
-            Fighter: 'path/to/male_halfling_fighter.jpg',
-            Wizard: 'path/to/male_halfling_wizard.jpg',
-            Cleric: 'path/to/male_halfling_cleric.jpg',
-            Rogue:
-              'https://cdn.midjourney.com/39373249-7b34-4978-a232-1f5f5ed6e115/0_0.png',
-            Ranger: 'path/to/male_halfling_ranger.jpg'
-          },
-          Gnome: {
-            Fighter:
-              'https://cdn.midjourney.com/ef2c0255-6e15-4067-a01f-199641b73d85/0_0.png',
-            Wizard: 'path/to/male_gnome_wizard.jpg',
-            Cleric: 'path/to/male_gnome_cleric.jpg',
-            Rogue: 'path/to/male_gnome_rogue.jpg',
-            Ranger: 'path/to/male_gnome_ranger.jpg'
-          }
-        },
-        Female: {
-          Human: {
-            Fighter: 'path/to/female_human_fighter.jpg',
-            Wizard: 'path/to/female_human_wizard.jpg',
-            Cleric: 'path/to/female_human_cleric.jpg',
-            Rogue: 'path/to/female_human_rogue.jpg',
-            Ranger: 'path/to/female_human_ranger.jpg'
-          },
-          Elf: {
-            Fighter:
-              'https://cdn.midjourney.com/cf618b00-b9e9-41a6-a54a-532b5e23ba07/0_0.png',
-            Wizard: 'path/to/female_elf_wizard.jpg',
-            Cleric: 'path/to/female_elf_cleric.jpg',
-            Rogue: 'path/to/female_elf_rogue.jpg',
-            Ranger: 'path/to/female_elf_ranger.jpg'
-          },
-          Dwarf: {
-            Fighter: 'path/to/female_dwarf_fighter.jpg',
-            Wizard: 'path/to/female_dwarf_wizard.jpg',
-            Cleric: 'path/to/female_dwarf_cleric.jpg',
-            Rogue: 'path/to/female_dwarf_rogue.jpg',
-            Ranger:
-              'https://cdn.midjourney.com/5b567b76-d18b-44c5-af42-2b0865abcd98/0_0.png'
-          },
-          Halfling: {
-            Fighter: 'path/to/female_halfling_fighter.jpg',
-            Wizard: 'path/to/female_halfling_wizard.jpg',
-            Cleric: 'path/to/female_halfling_cleric.jpg',
-            Rogue:
-              'https://cdn.midjourney.com/39373249-7b34-4978-a232-1f5f5ed6e115/0_0.png',
-            Ranger:
-              'https://cdn.midjourney.com/0e9ddda5-4c3d-42b3-8a3f-331b1fe51f1d/0_0.png'
-          },
-          Gnome: {
-            Fighter:
-              'https://cdn.midjourney.com/845e99b7-cf88-4bae-8d21-59b503408c2a/0_0.png',
-            Wizard: 'path/to/female_gnome_wizard.jpg',
-            Cleric: 'path/to/female_gnome_cleric.jpg',
-            Rogue: 'path/to/female_gnome_rogue.jpg',
-            Ranger:
-              'https://cdn.midjourney.com/8dd58558-3f2e-4c5e-9d87-a620e733c33e/0_0.png'
-          }
+      let characterImages = {}
+
+      // Add this function to fetch the JSON data
+      async function loadCharacterImages() {
+        try {
+          const response = await fetch('./chars.json')
+          characterImages = await response.json()
+          console.log('Character images loaded successfully')
+        } catch (error) {
+          console.error('Error loading character images:', error)
         }
       }
 
@@ -353,7 +277,8 @@
         return Math.floor((stat - 10) / 2)
       }
 
-      function generateCharacter(blockHash = null) {
+      // Modify the generateCharacter function to wait for the images to load
+      async function generateCharacter(blockHash = null) {
         if (!userPubkey) {
           alert('Please login with Nostr first')
           return
@@ -368,26 +293,28 @@
 
         console.log('Using block hash:', blockHash)
 
-        createCharacter(userPubkey, blockHash)
-          .then(character => {
-            currentCharacter = character
-            console.log('Generated character:', currentCharacter)
+        try {
+          // Ensure character images are loaded before generating the character
+          await loadCharacterImages()
 
-            if (currentCharacter) {
-              document.getElementById('combatArea').style.display = 'block'
-            } else {
-              throw new Error('Character generation failed')
-            }
-          })
-          .catch(error => {
-            console.error('Error generating character:', error)
-            alert('Error generating character. Please try again.')
-          })
-          .finally(() => {
-            document.getElementById('loading').style.display = 'none'
-          })
+          const character = await createCharacter(userPubkey, blockHash)
+          currentCharacter = character
+          console.log('Generated character:', currentCharacter)
+
+          if (currentCharacter) {
+            document.getElementById('combatArea').style.display = 'block'
+          } else {
+            throw new Error('Character generation failed')
+          }
+        } catch (error) {
+          console.error('Error generating character:', error)
+          alert('Error generating character. Please try again.')
+        } finally {
+          document.getElementById('loading').style.display = 'none'
+        }
       }
 
+      // Update the displayCombatants function to use the new characterImages object
       function displayCombatants(player, enemy) {
         const playerStats = document.getElementById('playerStats')
         const enemyStats = document.getElementById('enemyStats')
@@ -505,7 +432,7 @@
         combatRound()
       }
 
-      // Add event listeners when the DOM is fully loaded
+      // Modify the DOMContentLoaded event listener to load character images
       document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('loginButton').addEventListener('click', login)
         document
@@ -538,6 +465,9 @@
         if (getQueryParam('pubkey') || localStorage.getItem('nostr:pubkey')) {
           login()
         }
+
+        // Load character images when the page loads
+        loadCharacterImages()
       })
     </script>
   </body>
