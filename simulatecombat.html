@@ -57,10 +57,6 @@
         justify-content: space-between;
         margin-bottom: 0.5rem;
       }
-      #rerollButton {
-        display: none;
-        margin-top: 1rem;
-      }
       #loading {
         text-align: center;
         display: none;
@@ -107,6 +103,37 @@
       .stat span:first-child {
         font-weight: bold;
       }
+
+      .combat-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+
+      .combatant {
+        width: 48%;
+        background-color: rgba(44, 62, 80, 0.6);
+        padding: 15px;
+        border-radius: 5px;
+      }
+
+      .combat-log {
+        margin-top: 20px;
+        background-color: rgba(44, 62, 80, 0.6);
+        padding: 15px;
+        border-radius: 5px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .round {
+        margin-bottom: 10px;
+      }
+
+      .winner {
+        color: #2ecc71;
+        font-weight: bold;
+      }
     </style>
     <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
@@ -122,8 +149,19 @@
         Generate Character
       </button>
       <div id="loading" style="display: none">Generating character...</div>
-      <div id="character"></div>
-      <button id="rerollButton" style="display: none">Simulate Combat</button>
+      <div id="combatArea" style="display: none">
+        <div class="enemy-selection">
+          <h3>Choose your enemy:</h3>
+          <button id="fightGoblin">Fight Goblin</button>
+          <button id="fightGiantRat">Fight Giant Rat</button>
+        </div>
+        <div class="combat-container">
+          <div id="playerStats" class="combatant"></div>
+          <div id="enemyStats" class="combatant"></div>
+        </div>
+        <button id="fightButton" style="display: none">Fight!</button>
+        <div id="combatLog" class="combat-log"></div>
+      </div>
     </div>
 
     <script type="module">
@@ -134,7 +172,7 @@
         '00000000518f4e7d696797d3891f88cc210dc5de1f7f6ec69c732d20a6371e7e'
 
       const monsterImages = {
-        golbin:
+        goblin:
           'https://cdn.midjourney.com/abb89f9c-0abe-4f92-bef9-88650f317b3f/0_0.png',
         giantrat:
           'https://cdn.midjourney.com/acd01992-96a9-47ef-bdb9-62c9a4bf30bc/0_0.png'
@@ -229,6 +267,22 @@
         }
       }
 
+      const goblin = {
+        name: 'Goblin',
+        hitPoints: 7,
+        armorClass: 15,
+        attackBonus: 4,
+        damage: '1d6+2'
+      }
+
+      const giantRat = {
+        name: 'Giant Rat',
+        hitPoints: 5,
+        armorClass: 12,
+        attackBonus: 4,
+        damage: '1d4+2'
+      }
+
       function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search)
         return urlParams.get(param)
@@ -308,8 +362,7 @@
         console.log('Starting character generation for pubkey:', userPubkey)
 
         document.getElementById('loading').style.display = 'block'
-        document.getElementById('character').innerHTML = ''
-        document.getElementById('rerollButton').style.display = 'none'
+        document.getElementById('combatArea').style.display = 'none'
 
         blockHash = blockHash || getQueryParam('blockhash') || defaultBlockHash
 
@@ -321,55 +374,135 @@
             console.log('Generated character:', currentCharacter)
 
             if (currentCharacter) {
-              displayCharacter(currentCharacter)
+              document.getElementById('combatArea').style.display = 'block'
             } else {
               throw new Error('Character generation failed')
             }
           })
           .catch(error => {
             console.error('Error generating character:', error)
-            document.getElementById('character').innerHTML =
-              'Error generating character. Please try again.'
+            alert('Error generating character. Please try again.')
           })
           .finally(() => {
             document.getElementById('loading').style.display = 'none'
           })
       }
 
-      function displayCharacter(character) {
-        const characterDiv = document.getElementById('character')
+      function displayCombatants(player, enemy) {
+        const playerStats = document.getElementById('playerStats')
+        const enemyStats = document.getElementById('enemyStats')
 
-        // Check if an image exists for this character combination
-        const imagePath =
-          characterImages[character.gender]?.[character.race]?.[character.class]
-
-        const imageHtml = imagePath
-          ? `<img src="${imagePath}" alt="${character.gender} ${character.race} ${character.class}" style="max-width: 100%; margin-bottom: 15px;">`
-          : ''
-
-        characterDiv.innerHTML = `
-          ${imageHtml}
-          <h2>${character.gender} ${character.race} ${character.class}</h2>
-          <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}/${character.hitPoints}</span></div>
-          <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
-          <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
-          <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
-          <div class="stat"><span>Intelligence:</span> <span>${character.stats.intelligence}</span></div>
-          <div class="stat"><span>Wisdom:</span> <span>${character.stats.wisdom}</span></div>
-          <div class="stat"><span>Charisma:</span> <span>${character.stats.charisma}</span></div>
-          <hr class="stat-divider">
-          <div class="stat xp"><span>Experience Points:</span> <span>0/2000</span></div>
+        playerStats.innerHTML = `
+          <h3>${player.gender} ${player.race} ${player.class}</h3>
+          <img src="${
+            characterImages[player.gender][player.race][player.class]
+          }" alt="${player.gender} ${player.race} ${
+          player.class
+        }" style="max-width: 100%; margin-bottom: 15px;">
+          <div>HP: <span id="playerHP">${player.hitPoints}</span>/${
+          player.hitPoints
+        }</div>
+          <div>AC: ${10 + getModifier(player.stats.dexterity)}</div>
+          <div>Attack Bonus: +${getModifier(player.stats.strength)}</div>
         `
-        document.getElementById('rerollButton').style.display = 'block'
+
+        enemyStats.innerHTML = `
+          <h3>${enemy.name}</h3>
+          <img src="${
+            monsterImages[enemy.name.toLowerCase().replace(' ', '')]
+          }" alt="${enemy.name}" style="max-width: 100%; margin-bottom: 15px;">
+          <div>HP: <span id="enemyHP">${enemy.hitPoints}</span>/${
+          enemy.hitPoints
+        }</div>
+          <div>AC: ${enemy.armorClass}</div>
+          <div>Attack Bonus: +${enemy.attackBonus}</div>
+        `
       }
 
-      function rerollCharacter() {
-        const pubkey = userPubkey
-        const blockHash = getQueryParam('blockhash') || defaultBlockHash
-        const combatUrl = `./simulatecombat.html?pubkey=${encodeURIComponent(
-          pubkey
-        )}&blockhash=${encodeURIComponent(blockHash)}`
-        window.open(combatUrl, '_blank')
+      function simulateCombat(player, enemy) {
+        const combatLog = document.getElementById('combatLog')
+        combatLog.innerHTML = ''
+        let round = 1
+        let playerHP = player.hitPoints
+        let enemyHP = enemy.hitPoints
+
+        function attack(attacker, defender, attackerHP, defenderHP) {
+          const roll = Math.floor(Math.random() * 20) + 1
+          let attackBonus, totalAttack, defenderAC, damage
+
+          if (attacker === player) {
+            attackBonus = getModifier(player.stats.strength)
+            totalAttack = roll + attackBonus
+            defenderAC = enemy.armorClass
+            damage =
+              Math.floor(Math.random() * 6) +
+              1 +
+              getModifier(player.stats.strength)
+          } else {
+            attackBonus = enemy.attackBonus
+            totalAttack = roll + attackBonus
+            defenderAC = 10 + getModifier(player.stats.dexterity)
+            const [diceCount, diceType] = enemy.damage.split('d')
+            const [diceSides, bonus] = diceType.split('+')
+            damage =
+              Array(parseInt(diceCount))
+                .fill()
+                .reduce(
+                  sum =>
+                    sum + Math.floor(Math.random() * parseInt(diceSides)) + 1,
+                  0
+                ) + parseInt(bonus)
+          }
+
+          if (totalAttack >= defenderAC) {
+            defenderHP -= damage
+            return `${
+              attacker.name || attacker.class
+            } hits for ${damage} damage!`
+          } else {
+            return `${attacker.name || attacker.class} misses!`
+          }
+        }
+
+        function combatRound() {
+          if (playerHP <= 0 || enemyHP <= 0) {
+            const winner = playerHP > 0 ? player.class : enemy.name
+            combatLog.innerHTML += `<div class="round winner">Combat ends! ${winner} wins!</div>`
+            document.getElementById('fightButton').disabled = false
+            return
+          }
+
+          combatLog.innerHTML += `<div class="round"><strong>Round ${round}:</strong></div>`
+
+          const playerResult = attack(player, enemy, playerHP, enemyHP)
+          combatLog.innerHTML += `<div>${playerResult}</div>`
+          if (playerResult.includes('hits')) {
+            enemyHP = Math.max(
+              0,
+              enemyHP - parseInt(playerResult.match(/\d+/)[0])
+            )
+            document.getElementById('enemyHP').textContent = enemyHP
+          }
+
+          if (enemyHP > 0) {
+            const enemyResult = attack(enemy, player, enemyHP, playerHP)
+            combatLog.innerHTML += `<div>${enemyResult}</div>`
+            if (enemyResult.includes('hits')) {
+              playerHP = Math.max(
+                0,
+                playerHP - parseInt(enemyResult.match(/\d+/)[0])
+              )
+              document.getElementById('playerHP').textContent = playerHP
+            }
+          }
+
+          round++
+          combatLog.scrollTop = combatLog.scrollHeight
+          setTimeout(combatRound, 1000)
+        }
+
+        document.getElementById('fightButton').disabled = true
+        combatRound()
       }
 
       // Add event listeners when the DOM is fully loaded
@@ -378,9 +511,26 @@
         document
           .getElementById('generateButton')
           .addEventListener('click', () => generateCharacter())
+        document.getElementById('fightGoblin').addEventListener('click', () => {
+          displayCombatants(currentCharacter, goblin)
+          document.getElementById('fightButton').style.display = 'block'
+          document.querySelector('.enemy-selection').style.display = 'none'
+        })
         document
-          .getElementById('rerollButton')
-          .addEventListener('click', rerollCharacter)
+          .getElementById('fightGiantRat')
+          .addEventListener('click', () => {
+            displayCombatants(currentCharacter, giantRat)
+            document.getElementById('fightButton').style.display = 'block'
+            document.querySelector('.enemy-selection').style.display = 'none'
+          })
+        document.getElementById('fightButton').addEventListener('click', () => {
+          const enemy =
+            document.getElementById('enemyStats').querySelector('h3')
+              .textContent === 'Goblin'
+              ? goblin
+              : giantRat
+          simulateCombat(currentCharacter, enemy)
+        })
 
         // Check if we have a pubkey in the query string or localStorage and log in automatically
         if (getQueryParam('pubkey') || localStorage.getItem('nostr:pubkey')) {
