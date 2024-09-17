@@ -52,10 +52,10 @@
       "Ranger": "path/to/female_elf_ranger.jpg"
     },
     "Dwarf": {
-      "Fighter": "path/to/female_dwarf_fighter.jpg",
-      "Wizard": "path/to/female_dwarf_wizard.jpg",
+      "Fighter": "https://cdn.midjourney.com/7e2eb079-ebbf-4cd4-b5bd-e1c47992257a/0_0.png",
+      "Wizard": "https://cdn.midjourney.com/37bf11d0-eb91-45d6-8175-1c7840c02417/0_0.png",
       "Cleric": "https://cdn.midjourney.com/aca3875c-6a7b-4a49-acba-c53d2ffd4285/0_0.png",
-      "Rogue": "path/to/female_dwarf_rogue.jpg",
+      "Rogue": "https://cdn.midjourney.com/a889275e-e71d-4099-9796-a7132ba438c2/0_0.png",
       "Ranger": "https://cdn.midjourney.com/5b567b76-d18b-44c5-af42-2b0865abcd98/0_0.png"
     },
     "Halfling": {
