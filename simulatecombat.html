@@ -419,15 +419,18 @@
         `
       }
 
-      function simulateCombat(player, enemy) {
+      function simulateCombat(player, enemy, seed) {
         const combatLog = document.getElementById('combatLog')
         combatLog.innerHTML = ''
         let round = 1
         let playerHP = player.hitPoints
         let enemyHP = enemy.hitPoints
 
+        // Create a seeded random number generator
+        const rng = new Math.seedrandom(seed)
+
         function attack(attacker, defender, attackerHP, defenderHP) {
-          const roll = Math.floor(Math.random() * 20) + 1
+          const roll = Math.floor(rng() * 20) + 1
           let attackBonus, totalAttack, defenderAC, damage
 
           if (attacker === player) {
@@ -435,9 +438,7 @@
             totalAttack = roll + attackBonus
             defenderAC = enemy.armorClass
             damage =
-              Math.floor(Math.random() * 6) +
-              1 +
-              getModifier(player.stats.strength)
+              Math.floor(rng() * 6) + 1 + getModifier(player.stats.strength)
           } else {
             attackBonus = enemy.attackBonus
             totalAttack = roll + attackBonus
@@ -448,8 +449,7 @@
               Array(parseInt(diceCount))
                 .fill()
                 .reduce(
-                  sum =>
-                    sum + Math.floor(Math.random() * parseInt(diceSides)) + 1,
+                  sum => sum + Math.floor(rng() * parseInt(diceSides)) + 1,
                   0
                 ) + parseInt(bonus)
           }
@@ -529,7 +529,9 @@
               .textContent === 'Goblin'
               ? goblin
               : giantRat
-          simulateCombat(currentCharacter, enemy)
+          const seed =
+            getQueryParam('seed') || Math.random().toString(36).substring(7)
+          simulateCombat(currentCharacter, enemy, seed)
         })
 
         // Check if we have a pubkey in the query string or localStorage and log in automatically
