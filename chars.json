@@ -30,7 +30,7 @@
     },
     "Gnome": {
       "Fighter": "https://cdn.midjourney.com/ef2c0255-6e15-4067-a01f-199641b73d85/0_0.png",
-      "Wizard": "path/to/male_gnome_wizard.jpg",
+      "Wizard": "https://cdn.midjourney.com/728df0f3-046f-4431-8f7c-d4f74e700888/0_0.png",
       "Cleric": "path/to/male_gnome_cleric.jpg",
       "Rogue": "path/to/male_gnome_rogue.jpg",
       "Ranger": "path/to/male_gnome_ranger.jpg"
@@ -54,7 +54,7 @@
     "Dwarf": {
       "Fighter": "path/to/female_dwarf_fighter.jpg",
       "Wizard": "path/to/female_dwarf_wizard.jpg",
-      "Cleric": "https://cdn.midjourney.com/728df0f3-046f-4431-8f7c-d4f74e700888/0_0.png",
+      "Cleric": "https://cdn.midjourney.com/aca3875c-6a7b-4a49-acba-c53d2ffd4285/0_0.png",
       "Rogue": "path/to/female_dwarf_rogue.jpg",
       "Ranger": "https://cdn.midjourney.com/5b567b76-d18b-44c5-af42-2b0865abcd98/0_0.png"
     },
