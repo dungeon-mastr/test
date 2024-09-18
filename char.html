@@ -89,14 +89,18 @@
       }
 
       async function fetchCharacterData() {
-        const pubkey = getQueryParam('uri')?.split(':')[2]
-        if (!pubkey) {
-          console.error('No pubkey provided in query string')
+        const leaderboardUri = getQueryParam('leaderboarduri')
+        const pubkeyUri = getQueryParam('pubkeyuri')
+
+        if (!leaderboardUri || !pubkeyUri) {
+          console.error('Missing leaderboarduri or pubkeyuri in query string')
           return null
         }
 
+        const pubkey = pubkeyUri.split(':')[2]
+
         try {
-          const response = await fetch('leaderboard.json')
+          const response = await fetch(leaderboardUri)
           if (!response.ok) {
             throw new Error('Network response was not ok')
           }
