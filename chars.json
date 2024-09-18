@@ -23,8 +23,8 @@
     },
     "Halfling": {
       "Fighter": "https://cdn.midjourney.com/d8b55d7a-6694-49a8-9292-3129c579f2d4/0_0.png",
-      "Wizard": "path/to/male_halfling_wizard.jpg",
-      "Cleric": "path/to/male_halfling_cleric.jpg",
+      "Wizard": "https://cdn.midjourney.com/2244b70c-78b4-429f-a351-a8ef85c08674/0_0.png",
+      "Cleric": "https://cdn.midjourney.com/b63a2641-19c1-4b5b-83fc-c6acd42353f7/0_0.png",
       "Rogue": "https://cdn.midjourney.com/39373249-7b34-4978-a232-1f5f5ed6e115/0_0.png",
       "Ranger": "https://cdn.midjourney.com/0e2df5bc-a5b4-46fd-8e10-5d7059e4301a/0_0.png"
     },
