@@ -113,8 +113,8 @@
           const row = document.createElement('tr')
           row.innerHTML = `
             <td>${index + 1}</td>
-            <td><a href="char.html?pubkeyuri=${encodeURIComponent(
-              character.pubkeyuri
+            <td><a href="char.html?pubkeyuri=nostr:pubkey:${encodeURIComponent(
+              character.pubkey
             )}&leaderboarduri=${encodeURIComponent(getQueryParam('uri'))}">${
             character.gender
           } ${character.race} ${character.class}</a></td>
