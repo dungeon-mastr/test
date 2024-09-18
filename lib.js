@@ -73,7 +73,7 @@ export async function createCharacter(pubkey, blockHash) {
       hitDice = 8
   }
 
-  const hitPoints = hitDice + constitutionModifier
+  const maxhp = hitDice + constitutionModifier
 
   const character = {
     gender: genders[
@@ -84,7 +84,8 @@ export async function createCharacter(pubkey, blockHash) {
     ],
     class: characterClass,
     stats,
-    hitPoints,
+    hitPoints: maxhp,
+    maxhp,
     xp: 0
   }
 

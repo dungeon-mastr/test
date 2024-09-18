@@ -275,7 +275,7 @@
           characterDiv.innerHTML = `
             ${imageHtml}
             <h2>${character.gender} ${character.race} ${character.class}</h2>
-            <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}/${character.hitPoints}</span></div>
+            <div class="stat"><span>Hit Points:</span> <span>${character.maxhp}/${character.hitPoints}</span></div>
             <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
             <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
             <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
@@ -290,7 +290,7 @@
           // Display character without image
           characterDiv.innerHTML = `
             <h2>${character.gender} ${character.race} ${character.class}</h2>
-            <div class="stat"><span>Hit Points:</span> <span>${character.hitPoints}/${character.hitPoints}</span></div>
+            <div class="stat"><span>Hit Points:</span> <span>${character.maxhp}/${character.hitPoints}</span></div>
             <div class="stat"><span>Strength:</span> <span>${character.stats.strength}</span></div>
             <div class="stat"><span>Dexterity:</span> <span>${character.stats.dexterity}</span></div>
             <div class="stat"><span>Constitution:</span> <span>${character.stats.constitution}</span></div>
