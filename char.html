@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nostr D&D Character Profile</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background-color: #34495e;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        max-width: 800px;
+        width: 100%;
+      }
+      h1 {
+        text-align: center;
+        color: #3498db;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        padding: 0.5rem;
+        text-align: left;
+        border-bottom: 1px solid #3498db;
+      }
+      th {
+        background-color: #2c3e50;
+        color: #3498db;
+      }
+      tr:nth-child(even) {
+        background-color: #2c3e50;
+      }
+      .status-alive {
+        color: #2ecc71;
+      }
+      .status-dead {
+        color: #e74c3c;
+      }
+      #loading {
+        text-align: center;
+        display: none;
+      }
+      .profile {
+        text-align: center;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+      .stat {
+        background-color: #2c3e50;
+        padding: 0.5rem;
+        border-radius: 5px;
+      }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Character Profile</h1>
+      <div id="loading">Loading character data...</div>
+      <div id="profile" class="profile">
+        <!-- Character profile will be inserted here -->
+      </div>
+    </div>
+
+    <script>
+      function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search)
+        return urlParams.get(param)
+      }
+
+      async function fetchCharacterData() {
+        const pubkey = getQueryParam('uri')?.split(':')[2]
+        if (!pubkey) {
+          console.error('No pubkey provided in query string')
+          return null
+        }
+
+        try {
+          const response = await fetch('leaderboard.json')
+          if (!response.ok) {
+            throw new Error('Network response was not ok')
+          }
+          const data = await response.json()
+          return data.find(char => char.pubkey === pubkey)
+        } catch (error) {
+          console.error('Error fetching character data:', error)
+          return null
+        }
+      }
+
+      function displayCharacterProfile(character) {
+        const profileDiv = document.getElementById('profile')
+        profileDiv.innerHTML = `
+          <h2>${character.gender} ${character.race} ${character.class}</h2>
+          <p>XP: ${character.xp}</p>
+          <p class="status-${character.status}">Status: ${character.status}</p>
+          <h3>Stats</h3>
+          <div class="stats">
+            ${Object.entries(character.stats)
+              .map(
+                ([stat, value]) => `
+              <div class="stat">
+                <strong>${
+                  stat.charAt(0).toUpperCase() + stat.slice(1)
+                }</strong>: ${value}
+              </div>
+            `
+              )
+              .join('')}
+          </div>
+          <h3>Items</h3>
+          <p>${
+            character.items.length ? character.items.join(', ') : 'No items'
+          }</p>
+        `
+      }
+
+      async function loadCharacterProfile() {
+        document.getElementById('loading').style.display = 'block'
+        const character = await fetchCharacterData()
+        document.getElementById('loading').style.display = 'none'
+
+        if (character) {
+          displayCharacterProfile(character)
+        } else {
+          document.getElementById('profile').innerHTML =
+            'Error loading character data'
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', loadCharacterProfile)
+    </script>
+  </body>
+</html>
