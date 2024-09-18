@@ -38,11 +38,11 @@
   },
   "Female": {
     "Human": {
-      "Fighter": "path/to/female_human_fighter.jpg",
-      "Wizard": "path/to/female_human_wizard.jpg",
-      "Cleric": "path/to/female_human_cleric.jpg",
-      "Rogue": "path/to/female_human_rogue.jpg",
-      "Ranger": "path/to/female_human_ranger.jpg"
+      "Fighter": "https://cdn.midjourney.com/be31d347-7b07-427f-a094-6780221958dd/0_0.png",
+      "Wizard": "https://cdn.midjourney.com/79ce2a57-47d5-4da7-8c25-3b6b1cdae13d/0_0.png",
+      "Cleric": "https://cdn.midjourney.com/b45fbba0-88ff-46b3-9ea1-858c5cd8f63c/0_0.png",
+      "Rogue": "https://cdn.midjourney.com/d2bab27a-1ea8-4113-9178-ffd0ff35f923/0_0.png",
+      "Ranger": "https://cdn.midjourney.com/55576f23-95ba-49f9-88dd-5fe33a36cb0c/0_0.png"
     },
     "Elf": {
       "Fighter": "https://cdn.midjourney.com/cf618b00-b9e9-41a6-a54a-532b5e23ba07/0_0.png",
