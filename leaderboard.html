@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nostr D&D Leaderboard</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background-color: #34495e;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        max-width: 800px;
+        width: 100%;
+      }
+      h1 {
+        text-align: center;
+        color: #3498db;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        padding: 0.5rem;
+        text-align: left;
+        border-bottom: 1px solid #3498db;
+      }
+      th {
+        background-color: #2c3e50;
+        color: #3498db;
+      }
+      tr:nth-child(even) {
+        background-color: #2c3e50;
+      }
+      .status-alive {
+        color: #2ecc71;
+      }
+      .status-dead {
+        color: #e74c3c;
+      }
+      #loading {
+        text-align: center;
+        display: none;
+      }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Dungeon Mastr Leaderboard</h1>
+      <div id="loading">Loading leaderboard...</div>
+      <table id="leaderboard">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Character</th>
+            <th>XP</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          <!-- Leaderboard data will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search)
+        return urlParams.get(param)
+      }
+
+      async function fetchLeaderboardData() {
+        const uri = getQueryParam('uri')
+        if (!uri) {
+          console.error('No URI provided in query string')
+          return null
+        }
+
+        try {
+          const response = await fetch(uri)
+          if (!response.ok) {
+            throw new Error('Network response was not ok')
+          }
+          return await response.json()
+        } catch (error) {
+          console.error('Error fetching leaderboard data:', error)
+          return null
+        }
+      }
+
+      function displayLeaderboard(data) {
+        const leaderboardBody = document.getElementById('leaderboardBody')
+        leaderboardBody.innerHTML = ''
+
+        data.sort((a, b) => b.xp - a.xp)
+
+        data.forEach((character, index) => {
+          const row = document.createElement('tr')
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${character.gender} ${character.race} ${character.class}</td>
+            <td>${character.xp}</td>
+            <td class="status-${character.status}">${character.status}</td>
+          `
+          leaderboardBody.appendChild(row)
+        })
+      }
+
+      async function loadLeaderboard() {
+        document.getElementById('loading').style.display = 'block'
+        const data = await fetchLeaderboardData()
+        document.getElementById('loading').style.display = 'none'
+
+        if (data) {
+          displayLeaderboard(data)
+        } else {
+          document.getElementById('leaderboardBody').innerHTML =
+            '<tr><td colspan="4">Error loading leaderboard data</td></tr>'
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', loadLeaderboard)
+    </script>
+  </body>
+</html>
