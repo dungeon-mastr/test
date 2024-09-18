@@ -15,11 +15,11 @@
       "Ranger": "https://cdn.midjourney.com/47002997-649b-426b-ad5b-c8179c049e95/0_0.png"
     },
     "Dwarf": {
-      "Fighter": "path/to/male_dwarf_fighter.jpg",
-      "Wizard": "path/to/male_dwarf_wizard.jpg",
-      "Cleric": "path/to/male_dwarf_cleric.jpg",
-      "Rogue": "path/to/male_dwarf_rogue.jpg",
-      "Ranger": "path/to/male_dwarf_ranger.jpg"
+      "Fighter": "https://cdn.midjourney.com/b9c19046-18db-42e1-ae8d-af1b8b7bae07/0_0.png",
+      "Wizard": "https://cdn.midjourney.com/cbcd781b-b0c0-48eb-ad5c-06a9e1be2348/0_0.png",
+      "Cleric": "https://cdn.midjourney.com/1282cd42-3568-4a74-a556-c3b568751498/0_0.png",
+      "Rogue": "https://cdn.midjourney.com/832a00d3-a262-4b11-b8e7-d868567e6ac4/0_0.png",
+      "Ranger": "https://cdn.midjourney.com/f8ccc372-8e0e-4217-8652-0f1d65557d73/0_0.png"
     },
     "Halfling": {
       "Fighter": "https://cdn.midjourney.com/d8b55d7a-6694-49a8-9292-3129c579f2d4/0_0.png",
