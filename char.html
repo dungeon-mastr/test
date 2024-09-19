@@ -122,6 +122,7 @@
       }
 
       function displayCharacterProfile(character) {
+        const leaderboardUri = getQueryParam('leaderboarduri')
         const profileDiv = document.getElementById('profile')
         profileDiv.innerHTML = `
           <img src="${character.imageUrl}" alt="${character.gender} ${
@@ -150,7 +151,9 @@
           <p>${
             character.items.length ? character.items.join(', ') : 'No items'
           }</p>
-          <p style="margin-top: 2rem; font-size: 0.9em;"><a href="./leaderboard.html" style="color: #3498db; text-decoration: none;">Back to Leaderboard</a></p>
+          <p style="margin-top: 2rem; font-size: 0.9em;"><a href="./leaderboard.html?uri=${encodeURIComponent(
+            leaderboardUri
+          )}" style="color: #3498db; text-decoration: none;">Back to Leaderboard</a></p>
         `
       }
 
