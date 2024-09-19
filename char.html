@@ -149,7 +149,11 @@
           </div>
           <h3>Items</h3>
           <p>${
-            character.items.length ? character.items.join(', ') : 'No items'
+            character.items.length
+              ? character.items
+                  .map(item => (item === 'dagger' ? '🗡️ Dagger' : item))
+                  .join(', ')
+              : 'No items'
           }</p>
           <p style="margin-top: 2rem; font-size: 0.9em;"><a href="./leaderboard.html?uri=${encodeURIComponent(
             leaderboardUri
