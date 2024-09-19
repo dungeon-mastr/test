@@ -3,6 +3,7 @@ import { createCharacter } from '../lib.js'
 const getCharacterFromPubkeyAndBlockhash = async (pubkey, blockhash) => {
   try {
     const character = await createCharacter(pubkey, blockhash)
+    character.blockhash = blockhash
     console.log(JSON.stringify(character))
   } catch (error) {
     console.error('Error getting character:', error.message)
