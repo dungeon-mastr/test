@@ -79,6 +79,7 @@
             <th>Rank</th>
             <th>Character</th>
             <th>XP</th>
+            <th>CP</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -120,6 +121,7 @@
         data.sort((a, b) => b.xp - a.xp)
 
         data.forEach((character, index) => {
+          const cp = Math.floor(character.satoshis / 100)
           const row = document.createElement('tr')
           row.innerHTML = `
             <td>${index + 1}</td>
@@ -129,6 +131,7 @@
             character.gender
           } ${character.race} ${character.class}</a></td>
             <td>${character.xp}</td>
+            <td>${cp}</td>
             <td class="status-${character.status.toLowerCase()}">${
             character.status
           }</td>
