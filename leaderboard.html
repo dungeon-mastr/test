@@ -81,6 +81,7 @@
             <th>XP</th>
             <th>CP</th>
             <th>Status</th>
+            <th>Items</th>
           </tr>
         </thead>
         <tbody id="leaderboardBody">
@@ -122,8 +123,6 @@
 
         data.forEach((character, index) => {
           const cp = Math.floor(character.satoshis / 100)
-          const hasDagger =
-            character.items && character.items.includes('dagger')
           const itemsDisplay = character.items
             ? character.items
                 .map(item => (item === 'dagger' ? '🗡️ dagger' : item))
